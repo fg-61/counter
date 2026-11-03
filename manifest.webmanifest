@@ -1,7 +1,7 @@
 {
-  "name": "Çetele",
-  "short_name": "Çetele",
-  "description": "Hedefli, çevrimdışı çalışan sayaç",
+  "name": "Sayaç",
+  "short_name": "Sayaç",
+  "description": "Hedeften geriye sayan sayaç ve gün sayacı",
   "lang": "tr",
   "start_url": "./",
   "scope": "./",
@@ -26,5 +26,6 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ]
+  ],
+  "id": "./"
 }

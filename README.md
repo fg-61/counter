@@ -1,4 +1,4 @@
-# Çetele
+# Sayaç / Counter
 
 Hedeften geriye sayan sayaç ve gün sayacı. Çevrimdışı çalışan PWA.
 

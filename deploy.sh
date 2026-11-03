@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Çetele PWA'yı GitHub Pages'e yükler. Kullanım: ./deploy.sh [repo-adi]
+# Sayaç PWA'yı GitHub Pages'e yükler. Kullanım: ./deploy.sh [repo-adi]
 set -euo pipefail
 REPO="${1:-cetele}"
 cd "$(dirname "$0")"
@@ -7,7 +7,7 @@ command -v gh >/dev/null || { echo "gh CLI gerekli: https://cli.github.com  (son
 OWNER="$(gh api user -q .login)"
 [ -d .git ] || git init -q -b main
 git add -A
-git commit -qm "Çetele PWA" 2>/dev/null || true
+git commit -qm "Sayaç PWA" 2>/dev/null || true
 if gh repo view "$OWNER/$REPO" >/dev/null 2>&1; then
   git remote get-url origin >/dev/null 2>&1 || git remote add origin "https://github.com/$OWNER/$REPO.git"
   git push -u origin main

@@ -3,15 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Çetele</title>
+<title>Sayaç</title>
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#EEF0EC" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#111413" media="(prefers-color-scheme: dark)">
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" href="manifest.webmanifest" id="mf">
+<script>try{if(!/^tr\b/i.test(navigator.language||"")){document.getElementById("mf").href="manifest.en.webmanifest";document.title="Counter";document.documentElement.lang="en";var t=document.querySelector('meta[name="apple-mobile-web-app-title"]');t&&(t.content="Counter")}}catch(e){}</script>
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Çetele">
+<meta name="apple-mobile-web-app-title" content="Sayaç">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Chivo+Mono:wght@700&display=swap">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box}</style>
@@ -135,42 +136,42 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 <body>
 
 <main class="app">
-  <nav class="tabs" id="tabs" role="tablist" aria-label="Çeteleler"></nav>
+  <nav class="tabs" id="tabs" role="tablist"></nav>
   <div class="head">
     <div class="headtop">
-      <span class="eyebrow" id="eyebrow">Çetele</span>
-      <div class="seg" role="group" aria-label="Tür">
-        <button id="mTally" aria-pressed="true">Sayaç</button>
-        <button id="mDays" aria-pressed="false">Gün</button>
+      <span class="eyebrow" id="eyebrow"></span>
+      <div class="seg" role="group" id="seg">
+        <button id="mTally" aria-pressed="true"></button>
+        <button id="mDays" aria-pressed="false"></button>
       </div>
     </div>
-    <input class="name" id="name" aria-label="Çetele adı" maxlength="40" autocomplete="off" enterkeyhint="done">
+    <input class="name" id="name" maxlength="40" autocomplete="off" enterkeyhint="done">
   </div>
   <div class="meter" id="meter" role="status" aria-live="polite"></div>
-  <div class="sub"><span id="unit">sayıldı</span><span id="info"></span></div>
+  <div class="sub"><span id="unit"></span><span id="info"></span></div>
   <div class="goal" id="goal">
     <div class="goalrow">
       <div class="fields">
-        <label for="target" id="targetLbl">Hedef <input id="target" type="number" inputmode="numeric" min="1" max="99999" placeholder="yok" enterkeyhint="done"></label>
-        <label for="start" id="startLbl" hidden>Başlangıç <input id="start" type="date"></label>
+        <label for="target" id="targetLbl"><span id="targetTxt"></span> <input id="target" type="number" inputmode="numeric" min="1" max="99999" enterkeyhint="done"></label>
+        <label for="start" id="startLbl" hidden><span id="startTxt"></span> <input id="start" type="date"></label>
       </div>
       <span id="left"></span>
     </div>
     <div class="bar" id="bar" hidden><i id="fill"></i></div>
   </div>
-  <button class="press" id="press" aria-label="Bir say"><span id="pressNum">+1</span><small id="pressLbl">bas</small></button>
+  <button class="press" id="press"><span id="pressNum">+1</span><small id="pressLbl"></small></button>
   <div class="days" id="days" hidden></div>
   <div class="row">
-    <button class="btn" id="undo">Geri al</button>
-    <button class="btn" id="reset">Sıfırla</button>
-    <button class="btn" id="del">Sil</button>
+    <button class="btn" id="undo"></button>
+    <button class="btn" id="reset"></button>
+    <button class="btn" id="del"></button>
   </div>
 </main>
 <div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetT">
   <div class="card">
     <h2 id="sheetT"></h2>
     <p id="sheetP"></p>
-    <div class="acts"><button id="sheetNo">Vazgeç</button><button class="go" id="sheetGo"></button></div>
+    <div class="acts"><button id="sheetNo"></button><button class="go" id="sheetGo"></button></div>
   </div>
 </div>
 <div class="toast" id="toast" hidden role="status"></div>
@@ -178,6 +179,41 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 <script>
 (()=>{
   const KEY='cetele.v1', MAX=99999, DAY=864e5;
+  const TR=/^tr\b/i.test(navigator.language||'');
+  const LOC=TR?'tr-TR':(navigator.language||'en-US');
+  // Türkçe "'dan/'den" eki
+  const ek=n=>{n=Math.abs(+n);
+    if(n%1000===0&&n) return 'den';
+    if(n%100===0&&n) return 'den';
+    const o=n%10, t=Math.floor(n/10)%10;
+    if(o) return ['','den','den','ten','ten','ten','dan','den','den','dan'][o];
+    return ['dan','dan','den','dan','tan','den','tan','ten','den','dan'][t];
+  };
+  const T=TR?{
+    app:'Sayaç', tabs:'Sayaçlar', kind:'Tür', nameLbl:'Sayaç adı', no:(i,n)=>'Sayaç No. '+i+' / '+n, def:i=>'Sayaç '+i, unnamed:'Adsız', add:'+ Yeni',
+    mTally:'Sayaç', mDays:'Gün', counted:'sayıldı', left:'kaldı', dLeft:'gün kaldı', dPassed:'gün oldu', dShort:'g',
+    startsIn:n=>'başlamasına '+n+' gün', ends:d=>'bitiş '+d, ended:d=>'bitti '+d, since:d=>d+'\'den beri', startedToday:'bugün başladı',
+    lastPress:t=>'son basış '+t, never:'henüz basılmadı', target:'Hedef', days:'Gün', start:'Başlangıç', none:'yok', eg:'ör. 10',
+    timeUp:'Süre doldu ✓', goalDone:'Hedef tamam ✓', notStarted:'henüz başlamadı', nthDay:n=>n+'. gün', pct:p=>'%'+p, hintTarget:'girersen geriye sayar',
+    hintDays:'Gün sayısı girersen (ör. 10) her gün bir kutu dolar ve sayaç 10\'dan geriye düşer.',
+    count:'say', down:'düş', pressLbl:'Bir say', startToday:'Bugün başlat', startedTodayBtn:'Bugün başladı ✓', undo:'Geri al', reset:'Sıfırla', del:'Sil', cancel:'Vazgeç',
+    qStart:'Sayım bugünden başlasın mı?', qStartTxt:(was,t)=>'Başlangıç '+was+' yerine bugün olacak. '+(t?'Gösterge yeniden '+t+'\''+ek(t)+' geriye sayacak.':'Gün sayısı bugünden itibaren sayılacak.'),
+    tStarted:t=>t?'Başladı · '+t+' gün kaldı':'Başladı · sayım bugünden',
+    qReset:n=>'"'+n+'" sıfırlansın mı?', qResetTxt:t=>t?'Gösterge yeniden '+t+'\''+ek(t)+' başlayacak.':'Sayı 0 olacak.', tReset:'Sıfırlandı',
+    qDel:n=>'"'+n+'" silinsin mi?', qDelTxt:'Bu sayaç ve sayısı kalıcı olarak silinir.', tDel:'Silindi'
+  }:{
+    app:'Counter', tabs:'Counters', kind:'Type', nameLbl:'Counter name', no:(i,n)=>'Counter No. '+i+' / '+n, def:i=>'Counter '+i, unnamed:'Untitled', add:'+ New',
+    mTally:'Count', mDays:'Days', counted:'counted', left:'left', dLeft:'days left', dPassed:'days in', dShort:'d',
+    startsIn:n=>'starts in '+n+(n===1?' day':' days'), ends:d=>'ends '+d, ended:d=>'ended '+d, since:d=>'since '+d, startedToday:'started today',
+    lastPress:t=>'last tap '+t, never:'no taps yet', target:'Target', days:'Days', start:'Start', none:'none', eg:'e.g. 10',
+    timeUp:'Time\'s up ✓', goalDone:'Goal reached ✓', notStarted:'not started', nthDay:n=>'day '+n, pct:p=>p+'%', hintTarget:'set one to count down',
+    hintDays:'Enter a number of days (e.g. 10). A box fills each day and the counter drops from 10.',
+    count:'tap', down:'down', pressLbl:'Count one', startToday:'Start today', startedTodayBtn:'Started today ✓', undo:'Undo', reset:'Reset', del:'Delete', cancel:'Cancel',
+    qStart:'Start counting from today?', qStartTxt:(was,t)=>'The start moves from '+was+' to today. '+(t?'The display counts down from '+t+' again.':'Days are counted from today.'),
+    tStarted:t=>t?'Started · '+t+' days left':'Started · counting from today',
+    qReset:n=>'Reset "'+n+'"?', qResetTxt:t=>t?'The display goes back to '+t+'.':'The count goes back to 0.', tReset:'Reset done',
+    qDel:n=>'Delete "'+n+'"?', qDelTxt:'This counter and its count are removed for good.', tDel:'Deleted'
+  };
   const $=id=>document.getElementById(id);
   const tabs=$('tabs'), nameEl=$('name'), targetEl=$('target'), startEl=$('start'), meter=$('meter');
   const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
@@ -185,28 +221,36 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
   const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
   const todayIso=()=>iso(new Date());
   const parse=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
-  const fmt=d=>d.toLocaleDateString('tr-TR',{day:'numeric',month:'short'});
+  const fmt=d=>d.toLocaleDateString(LOC,{day:'numeric',month:'short'});
+
+  // sabit metinler
+  tabs.setAttribute('aria-label',T.tabs); $('seg').setAttribute('aria-label',T.kind); nameEl.setAttribute('aria-label',T.nameLbl);
+  $('mTally').textContent=T.mTally; $('mDays').textContent=T.mDays; $('startTxt').textContent=T.start;
+  $('press').setAttribute('aria-label',T.pressLbl); $('reset').textContent=T.reset; $('del').textContent=T.del; $('sheetNo').textContent=T.cancel;
 
   function load(){
     try{const s=JSON.parse(localStorage.getItem(KEY)); if(s&&Array.isArray(s.counters)&&s.counters.length) return s;}catch(e){}
-    return {active:'a',counters:[{id:'a',name:'Çetele 1',mode:'tally',value:0,target:null,last:null}]};
+    return {active:'a',counters:[{id:'a',name:T.def(1),mode:'tally',value:0,target:null,last:null}]};
   }
   let state=load();
-  state.counters.forEach(c=>{c.mode=c.mode||'tally'; if(c.mode==='days'&&!c.start) c.start=todayIso();});
+  state.counters.forEach(c=>{
+    c.mode=c.mode||'tally'; if(c.mode==='days'&&!c.start) c.start=todayIso();
+    const m=/^(?:Çetele|Sayaç|Counter) (\d+)$/.exec(c.name||''); if(m) c.name=T.def(m[1]); // varsayılan adları yeni ada çevir
+  });
   const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}};
+  save();
   const cur=()=>state.counters.find(c=>c.id===state.active)||state.counters[0];
 
-  // Gösterilecek sayı ve durum
   function view(c){
     const t=c.target||null;
     if(c.mode==='days'){
-      const el=Math.round((parse(todayIso())-parse(c.start))/DAY); // geçen gün
-      if(el<0) return {n:t||0,unit:t?'gün kaldı':'gün oldu',el,t,future:-el,done:false};
-      if(t) return {n:Math.max(0,t-el),unit:'gün kaldı',el,t,done:el>=t};
-      return {n:el,unit:'gün oldu',el,t,done:false};
+      const el=Math.round((parse(todayIso())-parse(c.start))/DAY);
+      if(el<0) return {n:t||0,unit:t?T.dLeft:T.dPassed,el,t,future:-el,done:false};
+      if(t) return {n:Math.max(0,t-el),unit:T.dLeft,el,t,done:el>=t};
+      return {n:el,unit:T.dPassed,el,t,done:false};
     }
-    if(t) return {n:Math.max(0,t-c.value),unit:'kaldı',el:c.value,t,done:c.value>=t};
-    return {n:c.value,unit:'sayıldı',el:c.value,t,done:false};
+    if(t) return {n:Math.max(0,t-c.value),unit:T.left,el:c.value,t,done:c.value>=t};
+    return {n:c.value,unit:T.counted,el:c.value,t,done:false};
   }
 
   function renderTabs(){
@@ -216,15 +260,15 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
       b.className='tab'; b.setAttribute('role','tab');
       b.setAttribute('aria-selected',String(c.id===cur().id));
       b.innerHTML='<span class="t"></span><span class="n"></span>';
-      b.querySelector('.t').textContent=c.name||'Adsız';
-      b.querySelector('.n').textContent=v.done?'✓':(c.mode==='days'?v.n+'g':v.n);
+      b.querySelector('.t').textContent=c.name||T.unnamed;
+      b.querySelector('.n').textContent=v.done?'✓':(c.mode==='days'?v.n+T.dShort:v.n);
       b.onclick=()=>{state.active=c.id;save();render()};
       tabs.appendChild(b);
     });
     const a=document.createElement('button');
-    a.className='tab add'; a.textContent='+ Yeni';
+    a.className='tab add'; a.textContent=T.add;
     a.onclick=()=>{
-      const c={id:uid(),name:'Çetele '+(state.counters.length+1),mode:'tally',value:0,target:null,last:null};
+      const c={id:uid(),name:T.def(state.counters.length+1),mode:'tally',value:0,target:null,last:null};
       state.counters.push(c); state.active=c.id; save(); render();
       requestAnimationFrame(()=>tabs.scrollTo({left:tabs.scrollWidth,behavior:'smooth'}));
     };
@@ -247,7 +291,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 
   function renderDays(c,v){
     const box=$('days');
-    if(!v.t){box.innerHTML='<p>Gün sayısı girersen (ör. 10) her gün bir kutu dolar ve sayaç 10\'dan geriye düşer.</p>';return}
+    if(!v.t){box.innerHTML='';const p=document.createElement('p');p.textContent=T.hintDays;box.appendChild(p);return}
     const n=Math.min(v.t,1000), frag=document.createDocumentFragment();
     for(let i=0;i<n;i++){
       const d=document.createElement('i'); d.textContent=i+1;
@@ -264,7 +308,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     if(document.activeElement!==nameEl) nameEl.value=c.name;
     if(document.activeElement!==targetEl) targetEl.value=c.target||'';
     if(days&&document.activeElement!==startEl) startEl.value=c.start;
-    $('eyebrow').textContent='Çetele No. '+(state.counters.indexOf(c)+1)+' / '+state.counters.length;
+    $('eyebrow').textContent=T.no(state.counters.indexOf(c)+1,state.counters.length);
     $('mTally').setAttribute('aria-pressed',String(!days));
     $('mDays').setAttribute('aria-pressed',String(days));
 
@@ -272,20 +316,18 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     meter.setAttribute('aria-label',v.n+' '+v.unit);
     $('unit').textContent=v.unit;
 
-    // bilgi satırı
     let info='';
     if(days){
       const s=parse(c.start);
-      if(v.future) info='başlamasına '+v.future+' gün';
-      else if(v.t){const end=new Date(s);end.setDate(end.getDate()+v.t);info=(v.done?'bitti ':'bitiş ')+fmt(end);}
-      else info=fmt(s)+'\'den beri';
-      if(c.start===todayIso()&&!v.future) info='bugün başladı · '+info;
-    } else info=c.last?'son basış '+new Date(c.last).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}):'henüz basılmadı';
+      if(v.future) info=T.startsIn(v.future);
+      else if(v.t){const end=new Date(s);end.setDate(end.getDate()+v.t);info=(v.done?T.ended:T.ends)(fmt(end));}
+      else info=T.since(fmt(s));
+      if(c.start===todayIso()&&!v.future) info=T.startedToday+' · '+info;
+    } else info=c.last?T.lastPress(new Date(c.last).toLocaleTimeString(LOC,{hour:'2-digit',minute:'2-digit'})):T.never;
     $('info').textContent=info;
 
-    // hedef
-    $('targetLbl').firstChild.nodeValue=days?'Gün ':'Hedef ';
-    targetEl.placeholder=days?'ör. 10':'yok';
+    $('targetTxt').textContent=days?T.days:T.target;
+    targetEl.placeholder=days?T.eg:T.none;
     $('startLbl').hidden=!days;
     $('bar').hidden=!v.t;
     const g=$('goal');
@@ -293,19 +335,18 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     if(v.t){
       const p=Math.min(100,Math.max(0,v.el)/v.t*100);
       $('fill').style.width=p+'%';
-      $('left').textContent=v.done?(days?'Süre doldu ✓':'Hedef tamam ✓'):(days?(v.future?'henüz başlamadı':(v.el+1)+'. gün'):v.el+' / '+v.t)+' · %'+Math.floor(p);
-    } else $('left').textContent=days?'':'girersen geriye sayar';
+      $('left').textContent=v.done?(days?T.timeUp:T.goalDone):(days?(v.future?T.notStarted:T.nthDay(v.el+1)):v.el+' / '+v.t)+' · '+T.pct(Math.floor(p));
+    } else $('left').textContent=days?'':T.hintTarget;
 
-    // alt bölüm
     $('press').hidden=days; $('days').hidden=!days;
     if(days) renderDays(c,v);
     else{
       $('pressNum').textContent=v.t?'−1':'+1';
-      $('pressLbl').textContent=v.t?'düş':'say';
+      $('pressLbl').textContent=v.t?T.down:T.count;
       $('press').disabled=!!v.done;
     }
     const startedToday=days&&c.start===todayIso();
-    $('undo').textContent=days?(startedToday?'Bugün başladı ✓':'Bugün başlat'):'Geri al';
+    $('undo').textContent=days?(startedToday?T.startedTodayBtn:T.startToday):T.undo;
     $('undo').disabled=days?startedToday:c.value===0;
     $('reset').hidden=days;
     $('del').disabled=state.counters.length<2;
@@ -356,26 +397,23 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
   $('undo').addEventListener('click',()=>{
     const c=cur();
     if(c.mode==='tally') return bump(-1);
-    const was=fmt(parse(c.start));
-    ask({title:'Sayım bugünden başlasın mı?',
-         text:'Başlangıç '+was+' yerine bugün olacak. '+(c.target?'Gösterge yeniden '+c.target+'\'dan geriye sayacak.':'Gün sayısı bugünden itibaren sayılacak.'),
-         go:'Bugün başlat'},
-      ()=>{c.start=todayIso();save();render();toast(c.target?'Başladı · '+c.target+' gün kaldı':'Başladı · sayım bugünden');});
+    ask({title:T.qStart,text:T.qStartTxt(fmt(parse(c.start)),c.target),go:T.startToday},
+      ()=>{c.start=todayIso();save();render();toast(T.tStarted(c.target));});
   });
   $('reset').addEventListener('click',()=>{
     const c=cur();
-    ask({title:'"'+c.name+'" sıfırlansın mı?',text:c.target?'Gösterge yeniden '+c.target+'\'dan başlayacak.':'Sayı 0 olacak.',go:'Sıfırla',danger:true},
-      ()=>{c.value=0;c.last=null;save();render();toast('Sıfırlandı');});
+    ask({title:T.qReset(c.name),text:T.qResetTxt(c.target),go:T.reset,danger:true},
+      ()=>{c.value=0;c.last=null;save();render();toast(T.tReset);});
   });
   $('del').addEventListener('click',()=>{
     if(state.counters.length<2) return;
     const c=cur();
-    ask({title:'"'+c.name+'" silinsin mi?',text:'Bu çetele ve sayısı kalıcı olarak silinir.',go:'Sil',danger:true},()=>{
+    ask({title:T.qDel(c.name),text:T.qDelTxt,go:T.del,danger:true},()=>{
       const i=state.counters.indexOf(c); state.counters.splice(i,1);
-      state.active=state.counters[Math.max(0,i-1)].id; save(); render(); toast('Silindi');
+      state.active=state.counters[Math.max(0,i-1)].id; save(); render(); toast(T.tDel);
     });
   });
-  nameEl.addEventListener('input',()=>{cur().name=nameEl.value.trim()||'Adsız';save();renderTabs()});
+  nameEl.addEventListener('input',()=>{cur().name=nameEl.value.trim()||T.unnamed;save();renderTabs()});
   targetEl.addEventListener('input',()=>{
     const n=parseInt(targetEl.value,10), c=cur();
     c.target=n>0?Math.min(MAX,n):null;
@@ -392,7 +430,6 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
   });
   document.addEventListener('keyup',()=>$('press').classList.remove('down'));
 
-  // gün değişince yenile
   let lastDay=todayIso();
   const tick=()=>{ if(todayIso()!==lastDay){lastDay=todayIso();render()} };
   setInterval(tick,30000);
