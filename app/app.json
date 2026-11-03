@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "Çetele",
+    "slug": "cetele",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#EEF0EC",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.fatihgoren.cetele",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.fatihgoren.cetele",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#161A18",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": [],
+      "softwareKeyboardLayoutMode": "pan",
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": [
+      "expo-font",
+      "@react-native-community/datetimepicker",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 120,
+          "backgroundColor": "#EEF0EC",
+          "dark": {
+            "image": "./assets/splash-icon.png",
+            "backgroundColor": "#111413"
+          }
+        }
+      ]
+    ]
+  }
+}
