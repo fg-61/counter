@@ -37,7 +37,7 @@ Zikir, tesbih, alışkanlık takibi, oruç ya da kür günleri, sigarayı bırak
 **İçerik derecelendirmesi:** Herkes (anket: şiddet/cinsellik/kumar vb. yok, kullanıcılar arası etkileşim yok)
 **Hedef kitle:** 13 yaş ve üstü (veya 18+). Çocuklara yönelik değil.
 **Reklam içeriyor mu:** Hayır
-**Gizlilik politikası:** https://fg-61.github.io/cetele/privacy.html
+**Gizlilik politikası:** https://fg-61.github.io/counter/privacy.html
 
 **Veri güvenliği formu:**
 - Uygulama kullanıcı verisi topluyor ya da paylaşıyor mu? → **Hayır**

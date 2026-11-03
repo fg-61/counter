@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Sayaç PWA'yı GitHub Pages'e yükler. Kullanım: ./deploy.sh [repo-adi]
 set -euo pipefail
-REPO="${1:-cetele}"
+REPO="${1:-counter}"
 cd "$(dirname "$0")"
 command -v gh >/dev/null || { echo "gh CLI gerekli: https://cli.github.com  (sonra: gh auth login)"; exit 1; }
 OWNER="$(gh api user -q .login)"
