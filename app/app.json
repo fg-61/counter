@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Çetele",
+    "name": "Counter",
     "slug": "cetele",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -41,7 +41,12 @@
           }
         }
       ],
-      "./plugins/withReleaseSigning"
-    ]
+      "./plugins/withReleaseSigning",
+      "expo-localization"
+    ],
+    "locales": {
+      "tr": "./locales/tr.json",
+      "en": "./locales/en.json"
+    }
   }
 }

@@ -9,7 +9,7 @@ Telefona kurulum: GitHub Pages linkini aç → Android: menü › Ana ekrana ekl
 
 ## Android uygulaması (`app/`)
 
-Aynı uygulamanın Expo (React Native) ile yazılmış yerel Android sürümü. Paket adı: `com.fatihgoren.cetele`.
+Aynı uygulamanın Expo (React Native) ile yazılmış yerel Android sürümü. Telefon diline göre "Sayaç" ya da "Counter" adıyla görünür. Paket adı: `com.fatihgoren.cetele`.
 
 ```bash
 cd app

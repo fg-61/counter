@@ -1,4 +1,4 @@
-// Çetele: tek ekran — üstte çetele sekmeleri, ortada makaralı gösterge,
+// Sayaç / Counter: tek ekran — üstte sayaç sekmeleri, ortada makaralı gösterge,
 // altta basma tuşu (sayaç) ya da gün çetelesi (gün).
 import {
   Archivo_500Medium,
@@ -16,6 +16,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
+  Keyboard,
   AppState,
   Modal,
   Pressable,
@@ -47,6 +48,7 @@ import {
   todayIso,
   view,
 } from './src/logic';
+import { localeTag, T } from './src/i18n';
 import { Meter } from './src/Meter';
 import { font, Theme, useTheme } from './src/theme';
 
@@ -173,33 +175,31 @@ function Screen({ state, setState }: { state: State; setState: (f: (s: State) =>
   const onUndo = () => {
     if (!days) return press(-1);
     setAsk({
-      title: 'Sayım bugünden başlasın mı?',
-      text:
-        `Başlangıç ${fmtDate(parse(c.start!))} yerine bugün olacak. ` +
-        (c.target ? `Gösterge yeniden ${c.target}'dan geriye sayacak.` : 'Gün sayısı bugünden itibaren sayılacak.'),
-      go: 'Bugün başlat',
+      title: T.qStart,
+      text: T.qStartTxt(fmtDate(parse(c.start!)), c.target),
+      go: T.startToday,
       fn: () => {
         update((x) => ({ ...x, start: todayIso() }));
-        showToast(c.target ? `Başladı · ${c.target} gün kaldı` : 'Başladı · sayım bugünden');
+        showToast(T.tStarted(c.target));
       },
     });
   };
   const onReset = () =>
     setAsk({
-      title: `"${c.name}" sıfırlansın mı?`,
-      text: c.target ? `Gösterge yeniden ${c.target}'dan başlayacak.` : 'Sayı 0 olacak.',
-      go: 'Sıfırla',
+      title: T.qReset(c.name),
+      text: T.qResetTxt(c.target),
+      go: T.reset,
       danger: true,
       fn: () => {
         update((x) => ({ ...x, value: 0, last: null }));
-        showToast('Sıfırlandı');
+        showToast(T.tReset);
       },
     });
   const onDelete = () =>
     setAsk({
-      title: `"${c.name}" silinsin mi?`,
-      text: 'Bu çetele ve sayısı kalıcı olarak silinir.',
-      go: 'Sil',
+      title: T.qDel(c.name),
+      text: T.qDelTxt,
+      go: T.del,
       danger: true,
       fn: () => {
         setState((st) => {
@@ -207,7 +207,7 @@ function Screen({ state, setState }: { state: State; setState: (f: (s: State) =>
           const counters = st.counters.filter((_, j) => j !== i);
           return { active: counters[Math.max(0, i - 1)].id, counters };
         });
-        showToast('Silindi');
+        showToast(T.tDel);
       },
     });
 
@@ -219,7 +219,12 @@ function Screen({ state, setState }: { state: State; setState: (f: (s: State) =>
   const [nameFocus, setNameFocus] = useState(false);
 
   return (
-    <View style={[s.root, { paddingTop: insets.top + 14, paddingBottom: insets.bottom + 18 }]}>
+    // boş bir yere dokununca klavyeyi kapat
+    <Pressable
+      accessible={false}
+      onPress={Keyboard.dismiss}
+      style={[s.root, { paddingTop: insets.top + 14, paddingBottom: insets.bottom + 18 }]}
+    >
       <StatusBar style={t.dark ? 'light' : 'dark'} />
       <View style={[s.app, { paddingLeft: Math.max(16, insets.left), paddingRight: Math.max(16, insets.right) }]}>
         {/* sekmeler */}
@@ -239,20 +244,23 @@ function Screen({ state, setState }: { state: State; setState: (f: (s: State) =>
                 key={x.id}
                 accessibilityRole="tab"
                 accessibilityState={{ selected: sel }}
-                onPress={() => setState((st) => ({ ...st, active: x.id }))}
+                onPress={() => {
+                  Keyboard.dismiss();
+                  setState((st) => ({ ...st, active: x.id }));
+                }}
                 style={[s.tab, sel && s.tabSel]}
               >
                 <Text numberOfLines={1} style={[s.tabT, sel && { color: t.bg }]}>
-                  {x.name || 'Adsız'}
+                  {x.name || T.unnamed}
                 </Text>
                 <Text style={[s.tabN, sel && { color: t.accent }]}>
-                  {xv.done ? '✓' : x.mode === 'days' ? `${xv.n}g` : xv.n}
+                  {xv.done ? '✓' : x.mode === 'days' ? `${xv.n}${T.dShort}` : xv.n}
                 </Text>
               </Pressable>
             );
           })}
-          <Pressable onPress={addCounter} style={[s.tab, s.tabAdd]} accessibilityLabel="Yeni çetele">
-            <Text style={[s.tabT, { color: t.muted }]}>+ Yeni</Text>
+          <Pressable onPress={addCounter} style={[s.tab, s.tabAdd]} accessibilityLabel={T.addLbl}>
+            <Text style={[s.tabT, { color: t.muted }]}>{T.add}</Text>
           </Pressable>
         </ScrollView>
 
@@ -260,9 +268,9 @@ function Screen({ state, setState }: { state: State; setState: (f: (s: State) =>
         <View style={s.head}>
           <View style={s.headTop}>
             <Text style={s.eyebrow}>
-              ÇETELE NO. {index + 1} / {state.counters.length}
+              {T.no(index + 1, state.counters.length)}
             </Text>
-            <View style={s.seg} accessibilityRole="radiogroup" accessibilityLabel="Tür">
+            <View style={s.seg} accessibilityRole="radiogroup" accessibilityLabel={T.kind}>
               {(['tally', 'days'] as const).map((m) => (
                 <Pressable
                   key={m}
@@ -271,7 +279,7 @@ function Screen({ state, setState }: { state: State; setState: (f: (s: State) =>
                   onPress={() => changeMode(m)}
                   style={[s.segBtn, c.mode === m && { backgroundColor: t.fg }]}
                 >
-                  <Text style={[s.segT, c.mode === m && { color: t.bg }]}>{m === 'tally' ? 'Sayaç' : 'Gün'}</Text>
+                  <Text style={[s.segT, c.mode === m && { color: t.bg }]}>{m === 'tally' ? T.mTally : T.mDays}</Text>
                 </Pressable>
               ))}
             </View>
@@ -281,7 +289,7 @@ function Screen({ state, setState }: { state: State; setState: (f: (s: State) =>
             value={nameFocus ? nameDraft : c.name}
             onChangeText={(txt) => {
               setNameDraft(txt);
-              update((x) => ({ ...x, name: txt.trim() || 'Adsız' }));
+              update((x) => ({ ...x, name: txt.trim() || T.unnamed }));
             }}
             onFocus={() => {
               setNameDraft(c.name);
@@ -290,7 +298,7 @@ function Screen({ state, setState }: { state: State; setState: (f: (s: State) =>
             onBlur={() => setNameFocus(false)}
             maxLength={40}
             returnKeyType="done"
-            accessibilityLabel="Çetele adı"
+            accessibilityLabel={T.nameLbl}
             selectionColor={t.accent}
           />
         </View>
@@ -298,7 +306,7 @@ function Screen({ state, setState }: { state: State; setState: (f: (s: State) =>
         <Meter n={v.n} width={digitWidth(c, v)} h={cellH} t={t} label={`${v.n} ${v.unit}`} />
 
         <View style={s.sub}>
-          <Text style={s.unit}>{v.unit.toLocaleUpperCase('tr-TR')}</Text>
+          <Text style={s.unit}>{v.unit.toLocaleUpperCase(localeTag)}</Text>
           <Text style={s.info}>{infoText(c, v, now)}</Text>
         </View>
 
@@ -307,29 +315,29 @@ function Screen({ state, setState }: { state: State; setState: (f: (s: State) =>
           <View style={s.goalRow}>
             <View style={s.fields}>
               <View style={s.field}>
-                <Text style={s.label}>{days ? 'Gün' : 'Hedef'}</Text>
+                <Text style={s.label}>{days ? T.days : T.target}</Text>
                 <TextInput
                   key={c.id + c.mode}
                   style={[s.input, { width: 92, textAlign: 'right' }]}
                   defaultValue={c.target ? String(c.target) : ''}
-                  placeholder={days ? 'ör. 10' : 'yok'}
+                  placeholder={days ? T.eg : T.none}
                   placeholderTextColor={t.muted}
                   keyboardType="number-pad"
                   maxLength={5}
                   returnKeyType="done"
                   onChangeText={(txt) => update((x) => setTarget(x, txt))}
-                  accessibilityLabel={days ? 'Gün sayısı' : 'Hedef'}
+                  accessibilityLabel={days ? T.daysLbl : T.target}
                   selectionColor={t.accent}
                 />
               </View>
               {days && (
                 <View style={s.field}>
-                  <Text style={s.label}>Başlangıç</Text>
+                  <Text style={s.label}>{T.start}</Text>
                   <Pressable
                     style={[s.input, { justifyContent: 'center' }]}
                     onPress={pickStart}
                     accessibilityRole="button"
-                    accessibilityLabel={`Başlangıç tarihi ${fmtDate(parse(c.start!))}`}
+                    accessibilityLabel={T.startLbl(fmtDate(parse(c.start!)))}
                   >
                     <Text style={s.dateT}>{fmtDate(parse(c.start!))}</Text>
                   </Pressable>
@@ -350,29 +358,29 @@ function Screen({ state, setState }: { state: State; setState: (f: (s: State) =>
             t={t}
             disabled={v.done}
             label={v.t ? '−1' : '+1'}
-            small={v.t ? 'DÜŞ' : 'SAY'}
+            small={v.t ? T.down : T.count}
             onPress={() => press(1)}
           />
         )}
 
         <View style={s.row}>
           <Btn s={s} onPress={onUndo} disabled={days ? startedToday : c.value === 0}>
-            {days ? (startedToday ? 'Bugün başladı ✓' : 'Bugün başlat') : 'Geri al'}
+            {days ? (startedToday ? T.startedTodayBtn : T.startToday) : T.undo}
           </Btn>
           {!days && (
             <Btn s={s} onPress={onReset}>
-              Sıfırla
+              {T.reset}
             </Btn>
           )}
           <Btn s={s} onPress={onDelete} disabled={state.counters.length < 2}>
-            Sil
+            {T.del}
           </Btn>
         </View>
       </View>
 
       <Sheet ask={ask} onClose={() => setAsk(null)} s={s} t={t} bottom={insets.bottom} />
       {toast && <Toast msg={toast} s={s} bottom={insets.bottom} />}
-    </View>
+    </Pressable>
   );
 }
 
@@ -392,7 +400,7 @@ function PressButton(p: { s: S; t: Theme; disabled: boolean; label: string; smal
       onPress={p.onPress}
       disabled={p.disabled}
       accessibilityRole="button"
-      accessibilityLabel="Bir say"
+      accessibilityLabel={T.pressLbl}
       accessibilityState={{ disabled: p.disabled }}
       style={{ flex: 1, minHeight: 100, marginBottom: 8 }}
     >
@@ -417,7 +425,7 @@ function DaysGrid({ c, el, t, s }: { c: Counter; el: number; t: number | null; s
     return (
       <View style={s.days}>
         <Text style={s.daysP}>
-          Gün sayısı girersen (ör. 10) her gün bir kutu dolar ve sayaç 10&apos;dan geriye düşer.
+          {T.hintDays}
         </Text>
       </View>
     );
@@ -463,7 +471,7 @@ function Sheet({ ask, onClose, s, t, bottom }: { ask: Ask | null; onClose: () =>
           <Text style={s.cardP}>{a?.text}</Text>
           <View style={s.acts}>
             <Pressable style={s.act} onPress={onClose} accessibilityRole="button">
-              <Text style={s.actT}>Vazgeç</Text>
+              <Text style={s.actT}>{T.cancel}</Text>
             </Pressable>
             <Pressable
               style={[s.act, { backgroundColor: a?.danger ? t.danger : t.fg, borderColor: a?.danger ? t.danger : t.fg }]}
@@ -634,7 +642,7 @@ const makeStyles = (t: Theme) =>
     },
     btnT: { fontFamily: font.uiSemi, fontSize: 15, color: t.fg },
 
-    sheet: { flex: 1, justifyContent: 'flex-end', alignItems: 'center', backgroundColor: 'rgba(10,12,11,0.5)', padding: 16 },
+    sheet: { flex: 1, justifyContent: 'flex-end', alignItems: 'center', backgroundColor: 'rgba(10,12,11,0.5)', paddingTop: 16, paddingHorizontal: 20 },
     card: {
       width: '100%',
       maxWidth: 420,

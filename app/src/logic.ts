@@ -1,4 +1,5 @@
-// Çetele'nin saf mantığı: durum şekli, gösterilecek sayı, tarih yardımcıları.
+// Sayaç'ın saf mantığı: durum şekli, gösterilecek sayı, tarih yardımcıları.
+import { isTr, localeTag, T } from './i18n';
 
 export type Mode = 'tally' | 'days';
 
@@ -26,7 +27,14 @@ export const parse = (s: string) => {
 };
 
 const MONTHS = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
-export const fmtDate = (d: Date) => `${d.getDate()} ${MONTHS[d.getMonth()]}`;
+export const fmtDate = (d: Date) => {
+  if (isTr) return `${d.getDate()} ${MONTHS[d.getMonth()]}`;
+  try {
+    return d.toLocaleDateString(localeTag, { day: 'numeric', month: 'short' });
+  } catch {
+    return iso(d);
+  }
+};
 export const fmtTime = (ms: number) => {
   const d = new Date(ms);
   return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
@@ -36,7 +44,7 @@ export const uid = () => Date.now().toString(36) + Math.random().toString(36).sl
 
 export const newCounter = (n: number): Counter => ({
   id: uid(),
-  name: `Çetele ${n}`,
+  name: T.def(n),
   mode: 'tally',
   value: 0,
   target: null,
@@ -47,6 +55,13 @@ export const initialState = (): State => {
   const c = newCounter(1);
   return { active: c.id, counters: [c] };
 };
+
+/** Boş adı "Adsız" yapar; eski varsayılan adları (Çetele 1, Counter 2…) telefon dilindeki yeni ada çevirir. */
+export function rename(name: unknown): string {
+  if (typeof name !== 'string' || !name) return T.unnamed;
+  const m = /^(?:Çetele|Sayaç|Counter) (\d+)$/.exec(name);
+  return m ? T.def(m[1]) : name;
+}
 
 /** Diskten gelen veriyi doğrular; bozuksa null döner. */
 export function normalize(raw: unknown, now = new Date()): State | null {
@@ -59,7 +74,7 @@ export function normalize(raw: unknown, now = new Date()): State | null {
       const mode: Mode = c.mode === 'days' ? 'days' : 'tally';
       return {
         id: c.id,
-        name: typeof c.name === 'string' && c.name ? c.name : 'Adsız',
+        name: rename(c.name),
         mode,
         value: Number.isFinite(c.value) ? Math.max(0, Math.min(MAX, c.value)) : 0,
         target: typeof c.target === 'number' && c.target > 0 ? Math.min(MAX, c.target) : null,
@@ -85,12 +100,12 @@ export function view(c: Counter, now = new Date()): View {
   const t = c.target || null;
   if (c.mode === 'days') {
     const el = Math.round((parse(todayIso(now)).getTime() - parse(c.start ?? todayIso(now)).getTime()) / DAY);
-    if (el < 0) return { n: t || 0, unit: t ? 'gün kaldı' : 'gün oldu', el, t, future: -el, done: false };
-    if (t) return { n: Math.max(0, t - el), unit: 'gün kaldı', el, t, done: el >= t };
-    return { n: el, unit: 'gün oldu', el, t, done: false };
+    if (el < 0) return { n: t || 0, unit: t ? T.dLeft : T.dPassed, el, t, future: -el, done: false };
+    if (t) return { n: Math.max(0, t - el), unit: T.dLeft, el, t, done: el >= t };
+    return { n: el, unit: T.dPassed, el, t, done: false };
   }
-  if (t) return { n: Math.max(0, t - c.value), unit: 'kaldı', el: c.value, t, done: c.value >= t };
-  return { n: c.value, unit: 'sayıldı', el: c.value, t, done: false };
+  if (t) return { n: Math.max(0, t - c.value), unit: T.left, el: c.value, t, done: c.value >= t };
+  return { n: c.value, unit: T.counted, el: c.value, t, done: false };
 }
 
 /** Sayaca n ekler; değer değişmezse null döner. `hit` hedefe ulaşıldığını söyler. */
@@ -126,26 +141,26 @@ export function infoText(c: Counter, v: View, now = new Date()): string {
   if (c.mode === 'days') {
     const s = parse(c.start ?? todayIso(now));
     let info: string;
-    if (v.future) info = `başlamasına ${v.future} gün`;
+    if (v.future) info = T.startsIn(v.future);
     else if (v.t) {
       const end = new Date(s);
       end.setDate(end.getDate() + v.t);
-      info = (v.done ? 'bitti ' : 'bitiş ') + fmtDate(end);
-    } else info = `${fmtDate(s)}'den beri`;
-    if (c.start === todayIso(now) && !v.future) info = `bugün başladı · ${info}`;
+      info = (v.done ? T.ended : T.ends)(fmtDate(end));
+    } else info = T.since(fmtDate(s));
+    if (c.start === todayIso(now) && !v.future) info = `${T.startedToday} · ${info}`;
     return info;
   }
-  return c.last ? `son basış ${fmtTime(c.last)}` : 'henüz basılmadı';
+  return c.last ? T.lastPress(fmtTime(c.last)) : T.never;
 }
 
 /** Hedef satırının sağındaki metin ve ilerleme yüzdesi. */
 export function goalText(c: Counter, v: View): { text: string; pct: number } {
   const days = c.mode === 'days';
-  if (!v.t) return { text: days ? '' : 'girersen geriye sayar', pct: 0 };
+  if (!v.t) return { text: days ? '' : T.hintTarget, pct: 0 };
   const pct = Math.min(100, (Math.max(0, v.el) / v.t) * 100);
-  if (v.done) return { text: days ? 'Süre doldu ✓' : 'Hedef tamam ✓', pct };
-  const left = days ? (v.future ? 'henüz başlamadı' : `${v.el + 1}. gün`) : `${v.el} / ${v.t}`;
-  return { text: `${left} · %${Math.floor(pct)}`, pct };
+  if (v.done) return { text: days ? T.timeUp : T.goalDone, pct };
+  const left = days ? (v.future ? T.notStarted : T.nthDay(v.el + 1)) : `${v.el} / ${v.t}`;
+  return { text: `${left} · ${T.pct(Math.floor(pct))}`, pct };
 }
 
 export const digitWidth = (c: Counter, v: View) =>

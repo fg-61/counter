@@ -1,5 +1,8 @@
 import { describe, expect, it } from '@jest/globals';
-import { bump, Counter, goalText, infoText, normalize, setMode, setTarget, view } from '../logic';
+import { ek, setLang } from '../i18n';
+import { bump, Counter, goalText, infoText, normalize, rename, setMode, setTarget, view } from '../logic';
+
+setLang('tr');
 
 const now = new Date(2026, 10, 3, 12, 0);
 const tally = (p: Partial<Counter> = {}): Counter => ({
@@ -79,5 +82,22 @@ describe('normalize', () => {
     const s = normalize({ active: 'zz', counters: [{ id: 'a', mode: 'days', value: -3 }] }, now)!;
     expect(s.active).toBe('a');
     expect(s.counters[0]).toMatchObject({ name: 'Adsız', value: 0, start: '2026-11-03' });
+  });
+});
+
+describe('i18n', () => {
+  it('picks the right Turkish suffix', () => {
+    expect([10, 5, 100, 3, 40, 1000, 6, 21, 33, 60].map((n) => `${n}'${ek(n)}`)).toEqual([
+      "10'dan", "5'ten", "100'den", "3'ten", "40'tan", "1000'den", "6'dan", "21'den", "33'ten", "60'tan",
+    ]);
+  });
+
+  it('renames old default names to the device-language name', () => {
+    expect(rename('Çetele 3')).toBe('Sayaç 3');
+    expect(rename('Tesbih')).toBe('Tesbih');
+    setLang('en');
+    expect(rename('Çetele 3')).toBe('Counter 3');
+    expect(view({ ...({} as Counter), mode: 'tally', value: 2, target: 5 }).unit).toBe('left');
+    setLang('tr');
   });
 });
