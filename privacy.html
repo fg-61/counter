@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Çetele – Gizlilik</title>
+<meta name="theme-color" content="#EEF0EC" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111413" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Chivo+Mono:wght@700&display=swap">
+<style>
+:root{
+  --bg:#EEF0EC; --surface:#FFFFFF; --fg:#1B1F1D; --muted:#5F6862; --line:#D3D8D2;
+  --drum:#161A18; --drum-fg:#F3F2EA; --accent:#E8A21A; --accent-deep:#A86F0A; --accent-fg:#1B1F1D;
+  --ok:#2E7A4C;
+  --f-num:"Chivo Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --f-ui:"Archivo", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111413; --surface:#1B1F1D; --fg:#E9ECE8; --muted:#97A19A; --line:#2E3431;
+  --drum:#050606; --drum-fg:#F3F2EA; --accent:#F0AE2C; --accent-deep:#9A6408; --accent-fg:#141614;
+  --ok:#5DC08A; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#111413; --surface:#1B1F1D; --fg:#E9ECE8; --muted:#97A19A; --line:#2E3431;
+  --drum:#050606; --drum-fg:#F3F2EA; --accent:#F0AE2C; --accent-deep:#9A6408; --accent-fg:#141614;
+  --ok:#5DC08A; color-scheme:dark }
+
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-ui);font-weight:500;line-height:1.55;-webkit-tap-highlight-color:transparent}
+.app{box-sizing:border-box;max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:16px;
+  padding:max(20px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(32px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
+.brand img{width:44px;height:44px;border-radius:12px}
+.brand b{font:700 20px/1.1 var(--f-ui)}
+.brand small{display:block;font-size:13px;color:var(--muted);font-weight:500}
+
+.meter{background:var(--drum);border-radius:16px;padding:18px 16px;box-shadow:inset 0 3px 10px rgba(0,0,0,.65),0 1px 0 var(--line)}
+.eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0 0 4px}
+.meter .eyebrow{color:#97A19A}
+h1{margin:0;font:700 28px/1.15 var(--f-ui);color:var(--drum-fg);text-wrap:balance}
+.date{margin:8px 0 0;font:700 13px var(--f-num);color:var(--accent)}
+
+.lead{margin:0;background:var(--accent);color:var(--accent-fg);border-radius:20px;padding:18px 18px;font-weight:600;font-size:16px;
+  box-shadow:0 6px 0 var(--accent-deep)}
+.lead code{font:700 13px var(--f-num);background:rgba(0,0,0,.08);padding:1px 6px;border-radius:6px}
+
+section{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:16px 18px}
+section h2{display:flex;align-items:baseline;gap:10px;margin:0 0 6px;font:700 17px/1.3 var(--f-ui)}
+section h2 span{font:700 12px var(--f-num);color:var(--muted)}
+section p{margin:0;color:var(--muted);font-size:15px}
+section strong{color:var(--fg)}
+a{color:var(--fg);text-decoration-color:var(--accent);text-decoration-thickness:2px;text-underline-offset:3px}
+footer{text-align:center;font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<main class="app">
+  <a class="brand" href="./">
+    <img src="icon-192.png" alt="" width="44" height="44">
+    <span><b>Çetele</b><small>Sayaç ve gün sayacı</small></span>
+  </a>
+
+  <header class="meter">
+    <p class="eyebrow">Gizlilik politikası</p>
+    <h1>Verilerin yalnızca telefonunda kalır</h1>
+    <p class="date">SON GÜNCELLEME · 03.11.2026</p>
+  </header>
+
+  <p class="lead">Çetele (Android uygulaması <code>com.fatihgoren.cetele</code> ve bu web sitesi) hiçbir kişisel veri toplamaz, saklamaz ya da paylaşmaz.</p>
+
+  <section>
+    <h2><span>01</span>Hangi veriler işleniyor?</h2>
+    <p>Oluşturduğun çetelelerin adları, sayıları, hedefleri ve başlangıç tarihleri <strong>yalnızca kendi cihazında</strong> saklanır. Bu veriler hiçbir sunucuya gönderilmez.</p>
+  </section>
+  <section>
+    <h2><span>02</span>Üçüncü taraflar</h2>
+    <p>Uygulamada reklam, analiz, çökme raporlama ya da hesap sistemi yoktur. Uygulama internet bağlantısı kullanmaz.</p>
+  </section>
+  <section>
+    <h2><span>03</span>İzinler</h2>
+    <p>Uygulama yalnızca titreşimi (dokunsal geri bildirim) ve sayarken ekranın açık kalmasını sağlayan sistem özelliklerini kullanır.</p>
+  </section>
+  <section>
+    <h2><span>04</span>Verilerin silinmesi</h2>
+    <p>Uygulamayı kaldırdığında ya da uygulama verilerini temizlediğinde tüm çeteleler cihazından kalıcı olarak silinir.</p>
+  </section>
+  <section>
+    <h2><span>05</span>Çocuklar</h2>
+    <p>Uygulama, çocuklar dahil hiçbir kullanıcıdan veri toplamaz.</p>
+  </section>
+  <section>
+    <h2><span>06</span>İletişim</h2>
+    <p>Soruların için: <a href="mailto:fatihgoren61@gmail.com">fatihgoren61@gmail.com</a></p>
+  </section>
+
+  <footer><a href="./">Çetele'yi tarayıcıda aç</a></footer>
+</main>
+</body>
+</html>
