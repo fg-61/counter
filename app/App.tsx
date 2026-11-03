@@ -128,9 +128,15 @@ function Screen({ state, setState }: { state: State; setState: (f: (s: State) =>
     if (days) deactivateKeepAwake().catch(() => {});
   }, [days]);
 
+  // hızlı art arda basışlarda yeniden çizimi beklemeden en güncel sayıdan devam et
+  const live = useRef(c);
+  useEffect(() => {
+    live.current = c;
+  }, [c]);
   const press = (n: number) => {
-    const r = bumpCounter(c, n);
+    const r = bumpCounter(live.current, n);
     if (!r) return;
+    live.current = r.counter;
     update(() => r.counter);
     if (r.hit) Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
     else if (n > 0) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});

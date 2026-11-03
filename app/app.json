@@ -36,11 +36,12 @@
           "imageWidth": 120,
           "backgroundColor": "#EEF0EC",
           "dark": {
-            "image": "./assets/splash-icon.png",
+            "image": "./assets/splash-icon-dark.png",
             "backgroundColor": "#111413"
           }
         }
-      ]
+      ],
+      "./plugins/withReleaseSigning"
     ]
   }
 }
