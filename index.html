@@ -3,11 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box}</style>
-</head>
-<body>
 <title>Çetele</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <meta name="theme-color" content="#EEF0EC" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#111413" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
@@ -15,8 +11,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Çetele">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Chivo+Mono:wght@700&display=swap">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box}</style>
 <style>
 /* Layout: tek ekran — üstte çetele sekmeleri, ortada makaralı gösterge, altta basma tuşu ya da gün çetelesi */
 :root{
@@ -132,6 +129,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 @media (max-height:640px){.press{min-height:100px}.cell{--h:62px}.days{min-height:90px}}
 @media (prefers-reduced-motion:reduce){.strip,.press,.bar i{transition:none}.sheet,.sheet .card,.toast{animation:none}}
 </style>
+</head>
+<body>
 
 <main class="app">
   <nav class="tabs" id="tabs" role="tablist" aria-label="Çeteleler"></nav>
